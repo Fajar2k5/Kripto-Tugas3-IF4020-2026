@@ -6,7 +6,8 @@ Tugas 3 IF4020 Kriptografi.
 
 .. note::
 
-   Saat ini baru menyediakan kerangka proyek. Kebanyakan implementasi belum tersedia.
+   Tahap 2 sudah menyediakan parser strict untuk bundle dan manifest. Trust store,
+   alur verifikasi, dan backend kriptografi belum tersedia.
 
 Dokumentasi
 -----------
@@ -17,7 +18,7 @@ Dokumentasi
 
    api
 
-Referensi cepat
+Quick commands
 ---------------
 
 - ``sleman --help`` menampilkan seluruh subcommand.

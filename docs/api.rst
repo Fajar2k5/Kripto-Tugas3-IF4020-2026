@@ -5,7 +5,7 @@ Halaman ini dihasilkan dengan ``sphinx.ext.autodoc`` dari docstring paket
 ``sleman``.
 
 Program Sleman
------------
+--------------
 
 .. automodule:: sleman
    :members:
@@ -17,13 +17,13 @@ Command Line
    :members: build_parser, main
 
 Status Constants
----------------
+----------------
 
 .. automodule:: sleman.errors
    :members:
 
 Algoritma yang Didukung
-----------------
+-----------------------
 
 .. automodule:: sleman.profiles
    :members:

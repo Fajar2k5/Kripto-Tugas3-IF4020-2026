@@ -16,6 +16,10 @@ class VerificationStatus(StrEnum):
     OK = "OK"
 
 
+class FormatError(ValueError):
+    """Input tidak sesuai format."""
+
+
 EXIT_CODES: dict[VerificationStatus, int] = {
     VerificationStatus.OK: 0,
     VerificationStatus.INPUT_ERROR: 2,
@@ -27,4 +31,4 @@ EXIT_CODES: dict[VerificationStatus, int] = {
     VerificationStatus.ARTIFACT_MISMATCH: 1,
 }
 
-__all__ = ["EXIT_CODES", "VerificationStatus"]
+__all__ = ["EXIT_CODES", "FormatError", "VerificationStatus"]
