@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sleman"
+version = "0.1.0"
+description = "Penandatanganan dan verifikasi software release"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+sleman = "sleman.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8,<9"]
+docs = ["sphinx>=9,<10"]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
