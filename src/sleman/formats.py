@@ -42,12 +42,14 @@ def _object_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return result
 
 
-def parse_json_object(data: bytes, *, max_bytes: int, label: str) -> dict[str, Any]:
-    """Parse satu objek JSON dengan batas ukuran."""
+def parse_json_object(
+    data: bytes, *, max_bytes: int | None, label: str
+) -> dict[str, Any]:
+    """Parse satu objek JSON dengan batas ukuran opsional."""
 
     if not isinstance(data, bytes):
         raise FormatError(f"{label} harus berupa byte")
-    if len(data) > max_bytes:
+    if max_bytes is not None and len(data) > max_bytes:
         raise FormatError(f"{label} melebihi batas {max_bytes} byte")
     if data.startswith(b"\xef\xbb\xbf"):
         raise FormatError(f"{label} tidak boleh memakai BOM")
