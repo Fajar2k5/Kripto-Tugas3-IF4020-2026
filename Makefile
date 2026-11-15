@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: test test-pytest docs clean-docs
+.PHONY: test test-pytest docs clean-docs benchmark-hash
 
 test:
 	PYTHONPATH=src $(PYTHON) -m unittest discover -s tests -v
@@ -13,3 +13,6 @@ docs:
 
 clean-docs:
 	rm -rf docs/_build
+
+benchmark-hash:
+	PYTHONPATH=src $(PYTHON) benchmarks/benchmark_hash.py
