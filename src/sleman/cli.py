@@ -3,11 +3,25 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from collections.abc import Sequence
+from pathlib import Path
 
 from . import __version__
+from .errors import FormatError, VerificationStatus
 from .profiles import SUPPORTED_PROFILES
+from .trust_store import (
+    TrustKeyNotFoundError,
+    add_trust,
+    list_trust,
+    remove_trust,
+)
+from .verification import (
+    VerificationBackend,
+    VerificationResult,
+    verify_release,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -28,6 +42,7 @@ def build_parser() -> argparse.ArgumentParser:
     keygen = subparsers.add_parser("keygen", help="Generate pasangan kunci.")
     keygen.add_argument("--algorithm", required=True, choices=SUPPORTED_PROFILES)
     keygen.add_argument("--out", required=True)
+    keygen.set_defaults(handler=_command_not_implemented)
 
     sign = subparsers.add_parser("sign", help="Tandatangani artefak.")
     sign.add_argument("--file", required=True)
@@ -35,6 +50,7 @@ def build_parser() -> argparse.ArgumentParser:
     sign.add_argument("--version", required=True)
     sign.add_argument("--key", required=True)
     sign.add_argument("--out", required=True)
+    sign.set_defaults(handler=_command_not_implemented)
 
     verify = subparsers.add_parser("verify", help="Verifikasi artefak.")
     verify.add_argument("--file", required=True)
@@ -59,16 +75,6 @@ def build_parser() -> argparse.ArgumentParser:
     trust_remove.add_argument("--keyid", required=True)
     trust_remove.add_argument("--store", required=True)
 
-    for command_parser in (
-        keygen,
-        sign,
-        verify,
-        trust_add,
-        trust_list,
-        trust_remove,
-    ):
-        command_parser.set_defaults(handler=_command_not_implemented)
-
     return parser
 
 
@@ -81,11 +87,121 @@ def _command_not_implemented(args: argparse.Namespace) -> int:
     return 2
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def _verify_command(
+    args: argparse.Namespace,
+    backend: VerificationBackend | None,
+) -> int:
+    try:
+        result = verify_release(
+            artifact_path=Path(args.file),
+            bundle_path=Path(args.bundle),
+            trust_store_path=Path(args.trust_store),
+            expected_package=args.package,
+            expected_version=args.version,
+            backend=backend,
+        )
+    except NotImplementedError:
+        result = VerificationResult(
+            status=VerificationStatus.INPUT_ERROR,
+            message="backend kriptografi belum tersedia",
+        )
+
+    if args.json_output:
+        print(
+            json.dumps(
+                result.as_dict(),
+                ensure_ascii=False,
+                separators=(",", ":"),
+            )
+        )
+        if not result.valid:
+            print(f"{result.status.value}: {result.message}", file=sys.stderr)
+    else:
+        print(f"{result.status.value}: {result.message}")
+        if result.algorithm is not None:
+            print(f"algorithm: {result.algorithm}")
+            print(f"keyid: {result.keyid}")
+            print(f"package: {result.package}")
+            print(f"version: {result.version}")
+
+    return result.exit_code
+
+
+def _trust_command(
+    args: argparse.Namespace,
+    backend: VerificationBackend | None,
+) -> int:
+    command = f"trust {args.trust_command}"
+    try:
+        if args.trust_command == "add":
+            try:
+                public_key = Path(args.key).read_bytes()
+            except OSError as exc:
+                raise OSError(f"kunci tidak dapat dibaca: {exc}") from exc
+            entry = add_trust(
+                Path(args.store),
+                public_key,
+                args.package,
+                backend=backend,
+            )
+            print(f"keyid: {entry['keyid']}")
+            print(f"algorithm: {entry['algorithm']}")
+            print(f"packages: {', '.join(entry['packages'])}")
+        elif args.trust_command == "list":
+            entries = list_trust(Path(args.store), backend=backend)
+            for entry in entries:
+                print(
+                    f"{entry['keyid']} {entry['algorithm']} "
+                    f"{', '.join(entry['packages'])}"
+                )
+        else:
+            remove_trust(Path(args.store), args.keyid, backend=backend)
+            print(f"keyid dihapus: {args.keyid}")
+    except NotImplementedError:
+        print(f"sleman {command}: backend kriptografi belum tersedia", file=sys.stderr)
+        return 2
+    except (OSError, FormatError, TrustKeyNotFoundError) as exc:
+        print(f"sleman {command}: {exc}", file=sys.stderr)
+        return 2
+    return 0
+
+
+def _is_verify_json(argv: Sequence[str]) -> bool:
+    return bool(argv) and argv[0] == "verify" and "--json" in argv
+
+
+def main(
+    argv: Sequence[str] | None = None,
+    backend: VerificationBackend | None = None,
+) -> int:
     parser = build_parser()
-    args = parser.parse_args(argv)
-    handler = args.handler
-    return handler(args)
+    arguments = list(sys.argv[1:] if argv is None else argv)
+
+    try:
+        args = parser.parse_args(arguments)
+    except SystemExit as exc:
+        if exc.code == 0:
+            raise
+        if _is_verify_json(arguments):
+            result = VerificationResult(
+                status=VerificationStatus.INPUT_ERROR,
+                message="pemakaian perintah tidak valid",
+            )
+            print(
+                json.dumps(
+                    result.as_dict(),
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                )
+            )
+            print(f"{result.status.value}: {result.message}", file=sys.stderr)
+        return 2
+
+    if args.command == "verify":
+        return _verify_command(args, backend)
+    if args.command == "trust":
+        return _trust_command(args, backend)
+    return args.handler(args)
 
 
 if __name__ == "__main__":

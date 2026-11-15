@@ -220,18 +220,26 @@ def _copy_entry(entry: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def parse_trust_store(
+    data: bytes, *, backend: CryptoBackend | None = None
+) -> dict[str, Any]:
+    """Parse dan validasi trust store dari byte"""
+
+    store = parse_json_object(
+        data,
+        max_bytes=None,
+        label="trust store",
+    )
+    return _validate_store(store, _get_backend(backend))
+
+
 def load_trust_store(
     path: Path, *, backend: CryptoBackend | None = None
 ) -> dict[str, Any]:
     """Baca dan validasi trust store"""
 
     path = Path(path)
-    store = parse_json_object(
-        path.read_bytes(),
-        max_bytes=None,
-        label="trust store",
-    )
-    return _validate_store(store, _get_backend(backend))
+    return parse_trust_store(path.read_bytes(), backend=backend)
 
 
 def add_trust(
@@ -306,5 +314,6 @@ __all__ = [
     "add_trust",
     "list_trust",
     "load_trust_store",
+    "parse_trust_store",
     "remove_trust",
 ]
