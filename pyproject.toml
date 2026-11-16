@@ -8,7 +8,9 @@ version = "0.1.0"
 description = "Penandatanganan dan verifikasi software release"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "cryptography>=50.0.2",
+]
 
 [project.scripts]
 sleman = "sleman.cli:main"

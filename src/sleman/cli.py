@@ -11,6 +11,7 @@ from pathlib import Path
 from . import __version__
 from .errors import FormatError, VerificationStatus
 from .profiles import SUPPORTED_PROFILES
+from .signing import keygen, sign_release
 from .trust_store import (
     TrustKeyNotFoundError,
     add_trust,
@@ -42,7 +43,6 @@ def build_parser() -> argparse.ArgumentParser:
     keygen = subparsers.add_parser("keygen", help="Generate pasangan kunci.")
     keygen.add_argument("--algorithm", required=True, choices=SUPPORTED_PROFILES)
     keygen.add_argument("--out", required=True)
-    keygen.set_defaults(handler=_command_not_implemented)
 
     sign = subparsers.add_parser("sign", help="Tandatangani artefak.")
     sign.add_argument("--file", required=True)
@@ -50,7 +50,6 @@ def build_parser() -> argparse.ArgumentParser:
     sign.add_argument("--version", required=True)
     sign.add_argument("--key", required=True)
     sign.add_argument("--out", required=True)
-    sign.set_defaults(handler=_command_not_implemented)
 
     verify = subparsers.add_parser("verify", help="Verifikasi artefak.")
     verify.add_argument("--file", required=True)
@@ -76,15 +75,6 @@ def build_parser() -> argparse.ArgumentParser:
     trust_remove.add_argument("--store", required=True)
 
     return parser
-
-
-def _command_not_implemented(args: argparse.Namespace) -> int:
-    command = "trust " + args.trust_command if args.command == "trust" else args.command
-    print(
-        f"sleman {command}: placeholder",
-        file=sys.stderr,
-    )
-    return 2
 
 
 def _verify_command(
@@ -201,7 +191,15 @@ def main(
         return _verify_command(args, backend)
     if args.command == "trust":
         return _trust_command(args, backend)
-    return args.handler(args)
+    try:
+        if args.command == "keygen":
+            print(f"keyid: {keygen(args.algorithm, Path(args.out))}")
+        else:
+            sign_release(Path(args.file), args.package, args.version, Path(args.key), Path(args.out))
+    except (OSError, FormatError) as exc:
+        print(f"sleman {args.command}: {exc}", file=sys.stderr)
+        return 2
+    return 0
 
 
 if __name__ == "__main__":
