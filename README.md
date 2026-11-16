@@ -2,6 +2,8 @@
 
 Sleman menandatangani artefak rilis dan memverifikasinya terhadap paket, versi, dan kunci penerbit dalam trust store lokal. CLI memerlukan Python 3.12+ dan pyca/cryptography. OpenSSL CLI digunakan untuk pengujian.
 
+Dokumentasi API: <https://fajar2k5.github.io/Kripto-Tugas3-IF4020-2026/>. Dokumentasi dibangun dari `docs/` dengan Sphinx; untuk membangun lokal jalankan `make docs`.
+
 ## Menjalankan CLI
 
 Dari direktori repositori, jalankan contoh berikut sekali di direktori output yang kosong. File README dipakai sebagai artefak untuk contoh.
