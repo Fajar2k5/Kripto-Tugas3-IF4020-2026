@@ -48,8 +48,6 @@ Skenario CLI membuat pasangan kunci sementara dan memeriksa exit code serta stat
 
 Benchmark memakai artefak identik dengan benchmark hash tim (1 KiB, 1 MiB, 16 MiB). Keygen mengukur 5 pembangkitan di memori. Setiap pengukuran sign memakai 5 pemanasan dan 30 sampel. Waktu primitif mencakup operasi kriptografi atas manifest. Waktu CLI mencakup proses Python baru, baca kunci dan artefak, hashing, penandatanganan, serta tulis bundle. P95 memakai nearest-rank pada posisi `ceil(0.95 × n)`. Data mentah, lingkungan, ukuran kunci DER dan bundle tersedia di [hasil benchmark](benchmarks/results/sign.json).
 
-Tabel median, P95, ukuran berkas, dan interpretasinya tersedia di [laporan Orvin](docs/laporan-orvin.md).
-
 ## Container linux/amd64
 
 ```sh
