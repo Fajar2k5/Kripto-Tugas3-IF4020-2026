@@ -4,18 +4,6 @@ Referensi API
 Halaman ini dihasilkan dengan ``sphinx.ext.autodoc`` dari docstring paket
 ``sleman``.
 
-Program Sleman
---------------
-
-.. automodule:: sleman
-   :members:
-
-Command Line
-------------
-
-.. automodule:: sleman.cli
-   :members: build_parser, main
-
 Status Constants
 ----------------
 
