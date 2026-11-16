@@ -60,4 +60,42 @@ docker run --rm --network none --user "$(id -u):$(id -g)" \
   sign --file README.md --package contoh-app --version 1.0.0 --key keys/publisher.key.pem --out container-release.json
 ```
 
+### Menggunakan image GHCR untuk menandatangani aplikasi
+
+Image Sleman adalah program penandatangan. Jalankan perintah berikut dari root repositori aplikasi yang berisi artefak. Contoh PowerShell ini menganggap artefak hasil build berada di `dist/aplikasi.zip`, dan image sudah dipublikasikan sebagai package publik. Ganti nama owner atau image bila package Anda berbeda.
+
+```powershell
+$image = "ghcr.io/orvin14/kripto-tugas3-if4020-2026:0.1.0"
+docker pull $image
+
+# Buat pasangan kunci di folder terpisah dari artefak aplikasi.
+New-Item -ItemType Directory -Force signing-keys | Out-Null
+docker run --rm -v "${PWD}/signing-keys:/keys" $image `
+  keygen --algorithm ed25519 --out /keys/publisher
+
+# Daftarkan kunci publik dan izinkan kunci tersebut menandatangani paket aplikasi.
+docker run --rm `
+  -v "${PWD}:/work" `
+  -v "${PWD}/signing-keys:/keys:ro" `
+  -w /work $image `
+  trust add --key /keys/publisher.pub.pem --package aplikasi --store /work/trust.json
+
+# Tandatangani artefak hasil build. Bundle ditulis kembali ke repositori aplikasi.
+docker run --rm `
+  -v "${PWD}:/work" `
+  -v "${PWD}/signing-keys:/keys:ro" `
+  -w /work $image `
+  sign --file /work/dist/aplikasi.zip --package aplikasi --version 1.0.0 `
+  --key /keys/publisher.key.pem --out /work/dist/release.json
+
+# Verifikasi bundle memakai artefak, nama paket, versi, dan trust store yang sama.
+docker run --rm -v "${PWD}:/work:ro" -w /work $image `
+  verify --file /work/dist/aplikasi.zip --bundle /work/dist/release.json `
+  --trust-store /work/trust.json --package aplikasi --version 1.0.0 --json
+```
+
+Jika verifikasi berhasil, status JSON adalah `OK` dan exit code proses adalah `0`. Untuk menguji integritas, ubah artefak setelah ditandatangani lalu ulangi `verify`. Verifikasi seharusnya gagal dengan status `ARTIFACT_MISMATCH`.
+
+Simpan `signing-keys/publisher.key.pem` dengan akses terbatas dan jangan commit atau bagikan kunci privat tersebut. Folder kunci dipasang read-only saat `sign`. Pastikan `dist/aplikasi.zip` sudah dibuat sebelum menjalankan contoh. Pull image publik tidak memerlukan login. Untuk package privat, lakukan `docker login ghcr.io -u <username>` dan masukkan GitHub Personal Access Token ketika Docker meminta password.
+
 Workflow [release-image](.github/workflows/release-image.yml) membangun image dari tag Git yang cocok dengan versi program (untuk 0.1.0, `v0.1.0`), menguji entrypoint, lalu mengirim image ke GHCR. Digest tercatat pada ringkasan run. Untuk rilis publik, pemilik package perlu mengaktifkan visibilitas publik dan memastikan pull anonim berhasil. Gunakan referensi `ghcr.io/<owner>/<repo>@sha256:<digest>` pada runner. Publikasi dan digest latihan ini belum terverifikasi.
