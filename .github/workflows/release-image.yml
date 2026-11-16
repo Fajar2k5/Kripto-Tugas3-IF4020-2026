@@ -1,0 +1,29 @@
+name: Build Sleman release image
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+  packages: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check version and build linux/amd64
+        shell: bash
+        run: |
+          set -eu
+          version=$(python3 -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')
+          test "$GITHUB_REF_NAME" = "v$version"
+          image="ghcr.io/${GITHUB_REPOSITORY,,}:$version"
+          echo "IMAGE=$image" >> "$GITHUB_ENV"
+          docker build --platform linux/amd64 -t "$image" .
+          docker run --rm --network none --user "$(id -u):$(id -g)" "$image" --version
+      - name: Publish and record digest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker push "$IMAGE"
+          docker image inspect --format '{{index .RepoDigests 0}}' "$IMAGE" >> "$GITHUB_STEP_SUMMARY"
