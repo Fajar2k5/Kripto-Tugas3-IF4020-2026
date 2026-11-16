@@ -1,0 +1,13 @@
+{
+  "schema": "minisign-trust/v1",
+  "keys": [
+    {
+      "keyid": "8d8cad304fcba64ef0caeed38d72b5946e7c929d591221d9f2885bd04e791b85",
+      "algorithm": "rsa-pss-sha256",
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA1RSJxqE2j9vxvCQ90YFA\nrTWDU8V6QpgDe8FRaQuqkIWgujdQJRHC4INu8ZsGx4Q5TYE5nqB5/XRR6GxjOAm0\nn7ulKk9oT0h7vj6Jk3KpfWpsBXTBc+NhxRZGuSRqHWltLufZGC3XNYny44CX6tpk\n8DNH1Qqu90wVVcl1FfWjpOt3IQijK0X5BhJ5LhVNb+4UMKBEX1NWAZHQsoFGsbsU\ni2a8iUYR0UAUWyQTZ4WIG24e6Zq5pAoMvDLi5MRjVeTPMWI7ev2CAnKTmq+IFhVj\n3Lhg0sNeACe23wBodp3OZ6RwiVvJvLyNvnozXeafJiE1YKhl3Vea+JVKnPwfZP5h\n4OBehnUESK0fQc67GKpzRIysU+bsIH8BxYvGeOYklH8yeZqyCK4B8ezmUfhOkZH+\nn4J48TOV0QzzmPB94PTxoWW/QwIdm6/DJKX4xrNRcCpJ7oJXNIsxKVI4SNYpMA8y\n4gmZILyC2neM6Kk/1b1o+x7F1+F5UcDlSsA4GgBEOZvZAgMBAAE=\n-----END PUBLIC KEY-----\n",
+      "packages": [
+        "demo-app"
+      ]
+    }
+  ]
+}

@@ -10,3 +10,4 @@ dist/
 tests/experiments/*
 !tests/experiments/README.md
 docs/_build/
+ci-out/

@@ -1,0 +1,107 @@
+name: Consumer release gate C01-C05
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SLEMAN_IMAGE: ghcr.io/orvin14/kripto-tugas3-if4020-2026@sha256:6635e7dbf5b757ba0c8c491adbeca8b7bacf668361c0590d4b3cce18f26c3404
+
+jobs:
+  c01:
+    name: C01 ${{ matrix.profile }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        profile:
+          - rsa-pss-sha256
+          - ecdsa-p256-sha256
+          - ed25519
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pull image by digest
+        run: |
+          set -euo pipefail
+          docker pull "$SLEMAN_IMAGE"
+          docker image inspect "$SLEMAN_IMAGE" --format '{{.Os}}/{{.Architecture}}'
+
+      - name: Sign, verify, then simulate publication
+        env:
+          SLEMAN_DEMO_KEY_RSA_PSS_SHA256: ${{ secrets.SLEMAN_DEMO_KEY_RSA_PSS_SHA256 }}
+          SLEMAN_DEMO_KEY_ECDSA_P256_SHA256: ${{ secrets.SLEMAN_DEMO_KEY_ECDSA_P256_SHA256 }}
+          SLEMAN_DEMO_KEY_ED25519: ${{ secrets.SLEMAN_DEMO_KEY_ED25519 }}
+        run: bash ci/run-c01.sh "${{ matrix.profile }}"
+
+      - name: Upload C01 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c01-${{ matrix.profile }}
+          path: ci-out/${{ matrix.profile }}
+          if-no-files-found: warn
+
+  negative:
+    name: C02-C04 negative scenarios
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pull image by digest
+        run: |
+          set -euo pipefail
+          docker pull "$SLEMAN_IMAGE"
+          docker image inspect "$SLEMAN_IMAGE" --format '{{.Os}}/{{.Architecture}}'
+
+      - name: Verify expected rejections and absence of publication marker
+        env:
+          SLEMAN_DEMO_KEY_ED25519: ${{ secrets.SLEMAN_DEMO_KEY_ED25519 }}
+        run: bash ci/run-negative.sh
+
+      - name: Upload negative-scenario evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c02-c04-negative
+          path: ci-out/negative
+          if-no-files-found: warn
+
+  c05:
+    name: C05 container runtime constraints
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pull image by digest
+        run: |
+          set -euo pipefail
+          docker pull "$SLEMAN_IMAGE"
+          docker image inspect "$SLEMAN_IMAGE" --format '{{.Os}}/{{.Architecture}}'
+
+      - name: Run without TTY, as runner UID/GID, with no network
+        run: |
+          set -euo pipefail
+          mkdir -p ci-out/c05
+          printf '%s\n' "$SLEMAN_IMAGE" > ci-out/c05/image.txt
+          id -u > ci-out/c05/uid.txt
+          id -g > ci-out/c05/gid.txt
+          docker run --rm --network none \
+            --user "$(id -u):$(id -g)" \
+            "$SLEMAN_IMAGE" --version | tee ci-out/c05/version.txt
+          docker run --rm --network none \
+            --user "$(id -u):$(id -g)" \
+            "$SLEMAN_IMAGE" --help > ci-out/c05/help.txt
+
+      - name: Upload C05 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c05-container
+          path: ci-out/c05
+          if-no-files-found: warn
