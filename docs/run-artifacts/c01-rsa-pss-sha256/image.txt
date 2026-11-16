@@ -1,0 +1,1 @@
+image=ghcr.io/orvin14/kripto-tugas3-if4020-2026@sha256:6635e7dbf5b757ba0c8c491adbeca8b7bacf668361c0590d4b3cce18f26c3404

@@ -7,7 +7,5 @@ htmlcov/
 build/
 dist/
 *.egg-info/
-tests/experiments/*
-!tests/experiments/README.md
 docs/_build/
 ci-out/

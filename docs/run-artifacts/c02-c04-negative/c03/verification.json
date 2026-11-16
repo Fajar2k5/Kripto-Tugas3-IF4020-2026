@@ -1,0 +1,1 @@
+{"valid":false,"status":"KEY_NOT_TRUSTED","message":"keyid tidak ditemukan di trust store","algorithm":"ed25519","keyid":"fd6c035ed72207d17423c48df58b83afc1e39760d93c1e45fec110707a15a374","package":"demo-app","version":"1.0.0"}

@@ -1,9 +1,9 @@
 PYTHON ?= python3
 
-.PHONY: test test-pytest docs clean-docs benchmark-hash
+.PHONY: test test-pytest docs clean-docs benchmark-hash benchmark-verify
 
 test:
-	PYTHONPATH=src $(PYTHON) -m unittest discover -s tests -v
+	uv run python -m unittest discover -s tests -v
 
 test-pytest:
 	uv run --group dev pytest
@@ -16,3 +16,6 @@ clean-docs:
 
 benchmark-hash:
 	PYTHONPATH=src $(PYTHON) benchmarks/benchmark_hash.py
+
+benchmark-verify:
+	uv run python benchmarks/benchmark_verify.py

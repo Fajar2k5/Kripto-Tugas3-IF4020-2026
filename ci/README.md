@@ -1,8 +1,7 @@
 # Consumer CI/CD
 
 Workflow [`.github/workflows/consumer-release-gate.yml`](../.github/workflows/consumer-release-gate.yml)
-menjalankan C01-C05 menggunakan image rilis Sleman yang sudah dipublikasikan. Workflow ini
-tidak membangun image dan tidak memasang program dari source.
+menjalankan C01-C05 menggunakan image rilis Sleman.
 
 ## Image yang dipakai
 
@@ -10,12 +9,11 @@ tidak membangun image dan tidak memasang program dari source.
 ghcr.io/orvin14/kripto-tugas3-if4020-2026@sha256:6635e7dbf5b757ba0c8c491adbeca8b7bacf668361c0590d4b3cce18f26c3404
 ```
 
-Referensi dikunci dengan digest. Jangan mengganti ke tag `latest` atau `0.1.0` tanpa
-memperbarui bukti pengujian.
+Referensi dikunci dengan digest, bukan versi/tag.
 
 ## Trust store
 
-Trust store berada di `ci/trust/` dan sudah disiapkan sebelum workflow berjalan:
+Trust store berada di `ci/trust/`:
 
 | Profil | File | Fingerprint |
 |---|---|---|
@@ -26,9 +24,6 @@ Trust store berada di `ci/trust/` dan sudah disiapkan sebelum workflow berjalan:
 
 Semua trust store mengizinkan package `demo-app`.
 
-Trust store ini hanya memuat kunci publik. Kunci privat demo **tidak disimpan di repo** dan
-harus dimasukkan ke GitHub Secrets.
-
 ## Secret yang diperlukan
 
 ```text
@@ -36,9 +31,6 @@ SLEMAN_DEMO_KEY_RSA_PSS_SHA256
 SLEMAN_DEMO_KEY_ECDSA_P256_SHA256
 SLEMAN_DEMO_KEY_ED25519
 ```
-
-Isi setiap secret adalah isi file private key PKCS8 PEM yang sesuai dengan trust store.
-Jangan menambahkan private key ke repository, workflow, log, artifact, atau image.
 
 Jika kunci dirotasi, buat trust store baru dari public key yang sesuai dengan:
 
@@ -80,4 +72,4 @@ bash ci/run-c01.sh ed25519
 bash ci/run-negative.sh
 ```
 
-Keluaran lokal berada di `ci-out/` dan diabaikan Git.
+Keluaran berada di `ci-out/`.

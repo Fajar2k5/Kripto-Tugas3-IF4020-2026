@@ -1,0 +1,15 @@
+usage: sleman [-h] [--version] {keygen,sign,verify,trust} ...
+
+Menandatangani dan memverifikasi software release menggunakan manifest,
+bundle, dan trust store.
+
+positional arguments:
+  {keygen,sign,verify,trust}
+    keygen              Generate pasangan kunci.
+    sign                Tandatangani artefak.
+    verify              Verifikasi artefak.
+    trust               Kelola trust store.
+
+options:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
