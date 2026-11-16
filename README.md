@@ -44,6 +44,8 @@ make benchmark-verify
 
 CLI membuat pasangan kunci sementara untuk pengujian dan memeriksa exit code serta status JSON.
 
+Daftar test case U01–U14 dan hasil log eksekusi terbaru ada di `tests/cases/results/latest.txt`.
+
 | Uji | Masukan dan hasil yang diharapkan | Hasil lokal |
 |---|---|---|
 | U01 | Teks dengan CRLF, byte 0–255, berkas kosong × 3 algoritma kriptografi. Ukuran dan hash cocok, verifikasi OK | 9 kombinasi PASS |
